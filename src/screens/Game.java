@@ -6,9 +6,9 @@ import tetronimos.Grid;
 import tetronimos.I_Block;
 
 public class Game {
-    PApplet sketch;
-    Grid grid;
-    I_Block i_block;
+    private PApplet sketch;
+    private Grid grid;
+    private I_Block i_block;
 
     public Game(PApplet sketch) {
         this.sketch = sketch;

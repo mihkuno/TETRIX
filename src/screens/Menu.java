@@ -7,12 +7,11 @@ import processing.core.PImage;
 
 public class Menu {
     public StartButton startButton;
-    private PApplet sketch;
     public PImage backgroundImage;
     public TitleText titleText;
+
+    private PApplet sketch;
     private boolean backgroundAnimation = true;
-    
-    
     private float backgroundImageY = -75.0f;
     private boolean backgroundImageDirection = true;
     
