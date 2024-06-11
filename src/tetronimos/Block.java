@@ -7,11 +7,11 @@ public abstract class Block {
     protected PApplet sketch;
     protected Random random;
     protected Grid grid;
-    protected int size;
     protected int faceIndex;
     protected int[][][] faces;
     protected int[][] block;
-    protected int r, g, b;
+    protected int size;
+    protected int type;
     protected int x, y;
 
     public Block(PApplet sketch, Grid grid) {
@@ -21,53 +21,47 @@ public abstract class Block {
         this.size   = this.grid.cell;
         this.x      = 0;
         this.y      = 0;
-        this.r      = this.setFill()[0];
-        this.g      = this.setFill()[1];
-        this.b      = this.setFill()[2];
-        this.faces     = this.setFaces();
-        this.faceIndex = this.random.nextInt(4);  
+        this.type   = this.setType();
+        this.faces  = this.setFaces();
+        this.faceIndex = this.random.nextInt(this.faces.length);  
         this.block     = this.faces[this.faceIndex];
     }
 
     public boolean rotate() {
-
-        // check parts of the next rotation if its colliding
-        final int rowLength = this.block.length;
-        for (int row = 0; row < rowLength; row++) {
-
-            final int colLength = this.block[row].length;
-            for (int col = 0; col < colLength; col++) {
-
-                // get the next face
-                int[][] nextBlock = this.faces[(this.faceIndex + 1) % this.faces.length];
-
-                // check if next face out of bounds
-                if (col + this.x < 0 || col + this.x >= this.grid.cols || row + this.y >= this.grid.rows) {
-                    return false;
-                }
-                    
-                // check if next face is colliding with a block on the grid
-                if (nextBlock[row][col] > 0 && this.grid.block[row + this.y][col + this.x] > 0) {
-                    return false;
-                }
-            }
+        int[][] nextBlock = this.faces[(this.faceIndex + 1) % this.faces.length];
+        if (!canMoveTo(nextBlock, this.x, this.y)) {
+            return false;
         }
-        
         this.faceIndex = (this.faceIndex + 1) % this.faces.length;
         this.block = this.faces[this.faceIndex];
         return true;
     }
-    
+
     public void render() {
-        this.sketch.fill(this.r, this.g, this.b);
         
-        final int rowLength = this.block.length;
-        for (int row = 0; row < rowLength; row++) {
-            
-            final int colLength = this.block[row].length;
-            for (int col = 0; col < colLength; col++) {
-                
+        // repeatedly move the ghost block down until it collides with something
+        int yGhost = this.y;
+        while (canMoveTo(this.block, this.x, yGhost + 1)) {
+            yGhost++;
+        }
+
+        for (int row = 0; row < this.block.length; row++) {
+            for (int col = 0; col < this.block[row].length; col++) {
                 if (this.block[row][col] > 0) {
+
+                    // ghost block
+                    int[] ghostColor = this.grid.colors[8];
+                    this.sketch.fill(ghostColor[0], ghostColor[1], ghostColor[2]);
+                    this.sketch.square(
+                        (col * this.size) + (this.grid.offsetX * this.size) + (this.x * this.size),
+                        (row * this.size) + (this.grid.offsetY * this.size) + (yGhost * this.size),  
+                        this.size
+                    );
+
+                    
+                    // player block
+                    int[] playerColor = this.grid.colors[this.type];
+                    this.sketch.fill(playerColor[0], playerColor[1], playerColor[2]);
                     this.sketch.square(
                         (col * this.size) + (this.grid.offsetX * this.size) + (this.x * this.size),
                         (row * this.size) + (this.grid.offsetY * this.size) + (this.y * this.size),  
@@ -79,85 +73,59 @@ public abstract class Block {
     } 
 
     public boolean moveLeft() {
-                
-        // check parts of the block if its colliding
-        final int rowLength = this.block.length;
-        for (int row = 0; row < rowLength; row++) {
-
-            final int colLength = this.block[row].length;
-            for (int col = 0; col < colLength; col++) {
-                    
-
-                // check if the block is at the left edge
-                if (this.block[row][col] > 0 && col + this.x == 0) {
-                    return false;
-                }
-
-                // check if the block will collide with another block on the grid
-                if (this.block[row][col] > 0 && this.grid.block[row + this.y][col + this.x - 1] > 0) {
-                    return false;
-                }
-                
-            }
-        }
-        
-        this.x--;
-        return true;
+        return moveTo(this.block, this.x - 1, this.y);
     }
 
     public boolean moveRight() {
-                
-        // check parts of the block if its colliding
-        final int rowLength = this.block.length;
-        for (int row = 0; row < rowLength; row++) {
-
-            final int colLength = this.block[row].length;
-            for (int col = 0; col < colLength; col++) {
-                    
-                // check if the block is at the left edge
-                if (this.block[row][col] > 0 && col + this.x == this.grid.cols - 1) {
-                    return false;
-                }
-
-                // check if the block will collide with another block on the grid
-                if (this.block[row][col] > 0 && this.grid.block[row + this.y][col + this.x + 1] > 0) {
-                    return false;
-                }
-
-            }
-        }
-        
-        this.x++;
-        return true;
+        return moveTo(this.block, this.x + 1, this.y);
     }
 
     public boolean moveDown() {
-        // check parts of the block if its colliding
-        final int rowLength = this.block.length;
-        for (int row = 0; row < rowLength; row++) {
+        return moveTo(this.block, this.x, this.y + 1);
+    }
 
-            final int colLength = this.block[row].length;
-            for (int col = 0; col < colLength; col++) {
-                    
-                // check if the block is at the bottom edge
-                if (this.block[row][col] > 0 && row + this.y == this.grid.rows - 1) {
-                    return false;
+    private boolean moveTo(int[][] block, int newX, int newY) {
+        if (canMoveTo(block, newX, newY)) {
+            this.x = newX;
+            this.y = newY;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean canMoveTo(int[][] block, int newX, int newY) {
+        for (int row = 0; row < block.length; row++) {
+            for (int col = 0; col < block[row].length; col++) {
+                if (block[row][col] > 0) {
+                    int newGlobalX = col + newX;
+                    int newGlobalY = row + newY;
+
+                    // Check if out of bounds
+                    if (newGlobalX < 0 || newGlobalX >= this.grid.cols || newGlobalY >= this.grid.rows) {
+                        return false;
+                    }
+
+                    // Check for collision
+                    if (newGlobalY >= 0 && this.grid.cells[newGlobalY][newGlobalX] > 0) {
+                        return false;
+                    }
                 }
-
-                // check if the block will collide with another block on the grid
-                if (this.block[row][col] > 0 && this.grid.block[row + this.y + 1][col + this.x] > 0) {
-                    return false;
-                }
-
             }
         }
-        
-        this.y++;
         return true;
     }
 
+    public void placeBlock() {
+        for (int row = 0; row < this.block.length; row++) {
+            for (int col = 0; col < this.block[row].length; col++) {
+                if (this.block[row][col] > 0) {
+                    this.grid.cells[row + this.y][col + this.x] = this.block[row][col];
+                }
+            }
+        }
+    }
+
     protected abstract int[][][] setFaces();
-    
-    protected abstract int[/*r, g, b*/] setFill();
-    
+
+    protected abstract int setType();
 }
