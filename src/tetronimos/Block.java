@@ -29,9 +29,33 @@ public abstract class Block {
         this.block     = this.faces[this.faceIndex];
     }
 
-    public void rotate() {
+    public boolean rotate() {
+
+        // check parts of the next rotation if its colliding
+        final int rowLength = this.block.length;
+        for (int row = 0; row < rowLength; row++) {
+
+            final int colLength = this.block[row].length;
+            for (int col = 0; col < colLength; col++) {
+
+                // get the next face
+                int[][] nextBlock = this.faces[(this.faceIndex + 1) % this.faces.length];
+
+                // check if next face out of bounds
+                if (col + this.x < 0 || col + this.x >= this.grid.cols || row + this.y >= this.grid.rows) {
+                    return false;
+                }
+                    
+                // check if next face is colliding with a block on the grid
+                if (nextBlock[row][col] > 0 && this.grid.block[row + this.y][col + this.x] > 0) {
+                    return false;
+                }
+            }
+        }
+        
         this.faceIndex = (this.faceIndex + 1) % this.faces.length;
         this.block = this.faces[this.faceIndex];
+        return true;
     }
     
     public void render() {
@@ -54,7 +78,7 @@ public abstract class Block {
         }
     } 
 
-    public void moveLeft() {
+    public boolean moveLeft() {
                 
         // check parts of the block if its colliding
         final int rowLength = this.block.length;
@@ -66,20 +90,22 @@ public abstract class Block {
 
                 // check if the block is at the left edge
                 if (this.block[row][col] > 0 && col + this.x == 0) {
-                    return;
+                    return false;
                 }
 
-                // // check left future position if collide with another block
-                // if (this.block[row][col] > 0 && this.grid.block[row + this.y][col + this.x - 1] > 0) {
-                //     return;
-                // }
+                // check if the block will collide with another block on the grid
+                if (this.block[row][col] > 0 && this.grid.block[row + this.y][col + this.x - 1] > 0) {
+                    return false;
+                }
+                
             }
         }
         
         this.x--;
+        return true;
     }
 
-    public void moveRight() {
+    public boolean moveRight() {
                 
         // check parts of the block if its colliding
         final int rowLength = this.block.length;
@@ -88,23 +114,50 @@ public abstract class Block {
             final int colLength = this.block[row].length;
             for (int col = 0; col < colLength; col++) {
                     
-
                 // check if the block is at the left edge
                 if (this.block[row][col] > 0 && col + this.x == this.grid.cols - 1) {
-                    return;
+                    return false;
                 }
 
+                // check if the block will collide with another block on the grid
+                if (this.block[row][col] > 0 && this.grid.block[row + this.y][col + this.x + 1] > 0) {
+                    return false;
+                }
 
             }
         }
         
         this.x++;
+        return true;
     }
-    
 
+    public boolean moveDown() {
+        // check parts of the block if its colliding
+        final int rowLength = this.block.length;
+        for (int row = 0; row < rowLength; row++) {
+
+            final int colLength = this.block[row].length;
+            for (int col = 0; col < colLength; col++) {
+                    
+                // check if the block is at the bottom edge
+                if (this.block[row][col] > 0 && row + this.y == this.grid.rows - 1) {
+                    return false;
+                }
+
+                // check if the block will collide with another block on the grid
+                if (this.block[row][col] > 0 && this.grid.block[row + this.y + 1][col + this.x] > 0) {
+                    return false;
+                }
+
+            }
+        }
+        
+        this.y++;
+        return true;
+    }
 
     protected abstract int[][][] setFaces();
     
-    protected abstract int[] setFill();
+    protected abstract int[/*r, g, b*/] setFill();
     
 }

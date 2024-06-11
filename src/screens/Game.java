@@ -39,6 +39,10 @@ public class Game {
         if (keyCode == PConstants.UP) {
             this.i_block.rotate();
         }
+
+        if (keyCode == PConstants.DOWN) {
+            this.i_block.moveDown();
+        }
         
     }
 }
