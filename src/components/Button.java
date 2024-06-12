@@ -25,11 +25,6 @@ public class Button extends Text {
 
     @Override
     public void render() {
-        if (isMouseHovering()) {
-            this.sketch.cursor(PConstants.HAND);
-        } else {
-            this.sketch.cursor(PConstants.ARROW);
-        }
 
         // Draw the button
         sketch.noStroke();

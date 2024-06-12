@@ -50,23 +50,30 @@ public abstract class Block {
                 if (this.block[row][col] > 0) {
 
                     // ghost block
-                    int[] ghostColor = this.grid.colors[8];
-                    this.sketch.fill(ghostColor[0], ghostColor[1], ghostColor[2]);
-                    this.sketch.square(
-                        (col * this.size) + (this.grid.offsetX * this.size) + (this.x * this.size),
-                        (row * this.size) + (this.grid.offsetY * this.size) + (yGhost * this.size),  
-                        this.size
-                    );
+                    // render the block if its below the hidden row
+                    if (row + yGhost > 0) {
+                        int[] ghostColor = this.grid.colors[8];
+                        this.sketch.fill(ghostColor[0], ghostColor[1], ghostColor[2]);
+                        this.sketch.square(
+                            (col * this.size) + (this.grid.offsetX * this.size) + (this.x * this.size),
+                            (row * this.size) + (this.grid.offsetY * this.size) + (yGhost * this.size),  
+                            this.size
+                        );
+                        
+                    }             
 
-                    
                     // player block
-                    int[] playerColor = this.grid.colors[this.type];
-                    this.sketch.fill(playerColor[0], playerColor[1], playerColor[2]);
-                    this.sketch.square(
-                        (col * this.size) + (this.grid.offsetX * this.size) + (this.x * this.size),
-                        (row * this.size) + (this.grid.offsetY * this.size) + (this.y * this.size),  
-                        this.size
-                    );
+                    // render the block if its below the hidden row
+                    if (row + this.y > 0) {
+                        int[] playerColor = this.grid.colors[this.type];
+                        this.sketch.fill(playerColor[0], playerColor[1], playerColor[2]);
+                        this.sketch.square(
+                            (col * this.size) + (this.grid.offsetX * this.size) + (this.x * this.size),
+                            (row * this.size) + (this.grid.offsetY * this.size) + (this.y * this.size),  
+                            this.size
+                        );
+                    }
+
                 }
             }
         }

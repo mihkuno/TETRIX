@@ -133,13 +133,16 @@ public class Game {
             // Create a new block
             this.player = this.getRandomBlock();
 
-            // Check if block can still be placed, otherwise the game is over
-            if (this.player.canBePlaced() == false) {
-                Main.SCREEN = "entering_menu";
-            }
-
             // Increase score for new block creation
             score += 0.5 * level;
+
+            // Check if block can still be placed, otherwise the game is over
+            if (this.player.canBePlaced() == false) {
+                this.grid.resetCells();
+                this.resetMechanics();
+                Main.SCREEN = "game_over";
+            }
+
             return false;    
         }
         return true;
@@ -159,5 +162,14 @@ public class Game {
         };
 
         return blocks[random.nextInt(blocks.length)];
+    }
+
+    private void resetMechanics() {
+        this.score = 0;
+        this.combo = 0;
+        this.level = 1;
+        this.linesCleared = 0;
+        this.gainUp = 5;
+        this.interval = 700;
     }
 }

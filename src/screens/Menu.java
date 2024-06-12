@@ -50,8 +50,6 @@ public class Menu {
                 this.backgroundImageY -= 0.24f;
             }    
         }
-        
-        this.sketch.background(246, 241, 226);
         this.sketch.image(this.backgroundImage, -125, this.backgroundImageY, this.sketch.width + 250, this.sketch.height + 150);
         this.titleText.render();
         this.startButton.render();

@@ -1,6 +1,7 @@
 package screens;
 
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.sound.SoundFile;
 
 
@@ -8,6 +9,7 @@ public class Main extends PApplet {
 
     private Menu menu;
     private Game game;
+    private GameOver gameOver;
     private SoundFile clickSound;
     private SoundFile menuSound;
 
@@ -24,6 +26,7 @@ public class Main extends PApplet {
     public void setup() {
         this.menu = new Menu(this);
         this.game = new Game(this);
+        this.gameOver = new GameOver(this);
 
         this.clickSound = new SoundFile(this, "assets/audios/m_click.mp3");
         this.menuSound = new SoundFile(this, "assets/audios/bg_wires.mp3");
@@ -39,17 +42,24 @@ public class Main extends PApplet {
         switch(SCREEN) {
             // static screens
             case "menu":
+                this.background(246, 241, 226);
                 this.menu.render();
                 break;
             case "game":
+                this.background(246, 241, 226);
                 this.game.render();
+                break;
+            case "game_over":
+                this.gameOver.render();
                 break;
         
             // animated transition between screens
             case "exiting_menu":
+                this.background(246, 241, 226);
                 this.exiting_menu();
                 break;
             case "entering_menu":
+                this.background(246, 241, 226);    
                 this.entering_menu();
                 break;
         }
@@ -57,22 +67,46 @@ public class Main extends PApplet {
 	    
     @Override
 	public void mousePressed(){
-        if (SCREEN == "menu") {
-            if (this.menu.startButton.isMouseHovering()) {
-                this.clickSound.play();
-                SCREEN = "exiting_menu";
-            }
+        switch(SCREEN) {
+            case "menu":
+                if (this.menu.startButton.isMouseHovering()) {
+                    this.cursor(PConstants.ARROW);
+                    this.clickSound.play();
+                    SCREEN = "exiting_menu";
+                }
+                break;
+            
+            case "game_over":
+                this.gameOver.handleMousePress();
+                break;
         }
+
 	}
 
     @Override
     public void keyPressed() {
-        this.game.handleKeyPress(this.keyCode);
+        switch (SCREEN) {
+            case "game":
+                this.game.handleKeyPress(this.keyCode);
+                break;
+        }
     }
 
     @Override
     public void mouseMoved() {
+        this.cursor(PConstants.ARROW);
 
+        switch (SCREEN) {
+            case "menu":
+                if (this.menu.startButton.isMouseHovering()) {
+                    this.cursor(PConstants.HAND);
+                }  
+                break;
+        
+            case "game_over":
+                this.gameOver.handleMouseHover();
+                break;
+        }
     }
 
     @Override

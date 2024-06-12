@@ -81,4 +81,12 @@ public class Grid {
         }
         return fullRows;
     }
+
+    public void resetCells() {
+        for (int i = 0; i < this.cells.length; i++) {
+            for (int j = 0; j < this.cells[i].length; j++) {
+                this.cells[i][j] = 0;
+            }
+        }
+    }
 }
