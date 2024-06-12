@@ -6,7 +6,7 @@ import processing.core.PApplet;
 public class Grid {
     
     public PApplet sketch;
-    public int rows = 20;
+    public int rows = 19;
     public int cols = 10;
     public int cell = 30;
     public int offsetX = 6;
@@ -32,7 +32,7 @@ public class Grid {
 
     public void render() {
         this.sketch.stroke(247, 241, 221);
-        for (int y = 0; y < cells.length; y++) {
+        for (int y = 1 /*hide the first top rows*/; y < cells.length; y++) {
             for (int x = 0; x < cells[y].length; x++) {
                 final int type = cells[y][x];
                 this.sketch.fill(this.colors[type][0], this.colors[type][1], this.colors[type][2]);
@@ -41,13 +41,16 @@ public class Grid {
         }
     }
 
-    public void clearFullRows() {
+    public int clearFullRows() {
         int[] fullRows = findFullRows();
+        int clearedRowsCount = 0;
         for (int row = 0; row < fullRows.length; row++) {
             if (fullRows[row] == 1) {
+                clearedRowsCount++;
                 shiftRowsDown(row);
             }
         }
+        return clearedRowsCount;
     }
 
     private void shiftRowsDown(int row) {

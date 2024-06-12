@@ -19,7 +19,7 @@ public abstract class Block {
         this.sketch = sketch;
         this.grid   = grid;
         this.size   = this.grid.cell;
-        this.x      = 0;
+        this.x      = (int) this.grid.cols / 2 - 1;
         this.y      = 0;
         this.type   = this.setType();
         this.faces  = this.setFaces();
@@ -82,6 +82,10 @@ public abstract class Block {
 
     public boolean moveDown() {
         return moveTo(this.block, this.x, this.y + 1);
+    }
+
+    public boolean canBePlaced() {
+        return canMoveTo(this.block, this.x, this.y);
     }
 
     private boolean moveTo(int[][] block, int newX, int newY) {
