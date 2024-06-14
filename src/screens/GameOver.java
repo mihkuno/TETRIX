@@ -47,7 +47,7 @@ public class GameOver {
             Main.SCREEN = "entering_menu";
         }
         else if (this.rankButton.isMouseHovering()) {
-            Main.SCREEN = "entering_menu";
+            Main.SCREEN = "ranking_edit";
         }
     }
 

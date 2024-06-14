@@ -25,11 +25,6 @@ public class Game {
 
     // score mechanics
     private Mechanic mechanic;
-    private int score = 0;
-    private int combo = 0;
-    private int level = 1;
-    private int linesCleared = 0;
-    private int gainUp = 5;
 
     public Game(PApplet sketch) {
         this.sketch   = sketch;
@@ -45,17 +40,23 @@ public class Game {
         this.secondComboSound = new SoundFile(this.sketch, "assets/audios/fx_lne02.mp3");
         this.thirdComboSound  = new SoundFile(this.sketch, "assets/audios/fx_lne03.mp3");
         this.fourthComboSound = new SoundFile(this.sketch, "assets/audios/fx_lne04.mp3");   
+
+        this.mechanic.setScore(0);
+        this.mechanic.setLevel(1);
+        this.mechanic.setCombo(0);
+        this.mechanic.setLines(0);
+        this.mechanic.setGainUp(5);
     }
 
     public void render() {
         this.sketch.background(246, 241, 226);
         this.sketch.windowTitle("Tetrix - Game");   
         this.mechanic.render(
-            this.score, 
-            this.level, 
-            this.combo, 
-            this.linesCleared, 
-            this.gainUp
+            this.mechanic.getScore(), 
+            this.mechanic.getLevel(), 
+            this.mechanic.getCombo(), 
+            this.mechanic.getLines(), 
+            this.mechanic.getGainUp()
         );
         this.grid.render();
         this.player.render();        
@@ -91,7 +92,8 @@ public class Game {
         if (this.sketch.key == ' ') {
            while(handleMoveDown()) { 
                // increase score for hard drop
-               score += 0.01 * level;
+               this.mechanic.setScore(
+                (int)(this.mechanic.getScore() + 0.01 * this.mechanic.getLevel()));
            }
         }
     }
@@ -107,26 +109,32 @@ public class Game {
             
             // clear row drop
             if (clearedRowsCount > 0) {
-                this.combo++;
-                if (this.combo == 1) this.firstComboSound.play();
-                else if (this.combo == 2) this.secondComboSound.play();
-                else if (this.combo == 3) this.thirdComboSound.play();
-                else if (this.combo == 4) this.fourthComboSound.play();
+                this.mechanic.setCombo(this.mechanic.getCombo() + 1);
+
+                if (this.mechanic.getCombo() == 1) this.firstComboSound.play();
+                else if (this.mechanic.getCombo() == 2) this.secondComboSound.play();
+                else if (this.mechanic.getCombo() == 3) this.thirdComboSound.play();
+                else if (this.mechanic.getCombo() >= 4) this.fourthComboSound.play();
                 
                 // Update score based on combo and level
-                score += (3 * level) * combo * clearedRowsCount;
-                linesCleared += clearedRowsCount;
+                
+                this.mechanic.setScore(
+                    (int)(this.mechanic.getScore() + (3 * this.mechanic.getLevel()) * this.mechanic.getCombo() * clearedRowsCount));
+
+                // Update lines cleared
+                this.mechanic.setLines(this.mechanic.getLines() + clearedRowsCount);
+                    
 
                 // Level up logic
-                if (linesCleared >= gainUp) {
-                    level++;
-                    gainUp += 5 + level;
+                if (this.mechanic.getLines() >= this.mechanic.getGainUp()) {
+                    this.mechanic.setLevel(this.mechanic.getLevel() + 1);
+                    this.mechanic.setGainUp(this.mechanic.getGainUp() + 5 + this.mechanic.getLevel());
                     interval = Math.max(100, interval - 100); // Decrease interval by 100ms per level, min 100ms
                 }
             }
             // regular drop
             else { 
-                this.combo = 0;
+                this.mechanic.setCombo(0);
                 this.dropSound.play(); 
             }
 
@@ -134,10 +142,12 @@ public class Game {
             this.player = this.getRandomBlock();
 
             // Increase score for new block creation
-            score += 0.5 * level;
+            this.mechanic.setScore(
+                (int)(this.mechanic.getScore() + 0.5 * this.mechanic.getLevel()));
 
             // Check if block can still be placed, otherwise the game is over
             if (this.player.canBePlaced() == false) {
+                Mechanic.save(this.mechanic.getScore());
                 this.grid.resetCells();
                 this.resetMechanics();
                 Main.SCREEN = "game_over";
@@ -165,11 +175,11 @@ public class Game {
     }
 
     private void resetMechanics() {
-        this.score = 0;
-        this.combo = 0;
-        this.level = 1;
-        this.linesCleared = 0;
-        this.gainUp = 5;
+        this.mechanic.setScore(0);
+        this.mechanic.setCombo(0);
+        this.mechanic.setLevel(1);
+        this.mechanic.setLines(0);
+        this.mechanic.setGainUp(5);
         this.interval = 700;
     }
 }

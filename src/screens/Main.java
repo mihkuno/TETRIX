@@ -10,6 +10,8 @@ public class Main extends PApplet {
     private Menu menu;
     private Game game;
     private GameOver gameOver;
+    private Ranking ranking;
+
     private SoundFile clickSound;
     private SoundFile menuSound;
 
@@ -27,11 +29,12 @@ public class Main extends PApplet {
         this.menu = new Menu(this);
         this.game = new Game(this);
         this.gameOver = new GameOver(this);
+        this.ranking = new Ranking(this);
 
         this.clickSound = new SoundFile(this, "assets/audios/m_click.mp3");
         this.menuSound = new SoundFile(this, "assets/audios/bg_wires.mp3");
         
-        // this.menuSound.play();
+        this.menuSound.play();
     }
 
 	
@@ -50,7 +53,19 @@ public class Main extends PApplet {
                 this.game.render();
                 break;
             case "game_over":
+                this.menuSound.stop();
                 this.gameOver.render();
+                break;
+
+            case "ranking_view":
+                this.background(246, 241, 226);
+                this.ranking.view();
+                this.ranking.render();
+                break;
+            case "ranking_edit":
+                this.background(246, 241, 226);
+                this.ranking.edit();
+                this.ranking.render();
                 break;
         
             // animated transition between screens
@@ -79,6 +94,14 @@ public class Main extends PApplet {
             case "game_over":
                 this.gameOver.handleMousePress();
                 break;
+
+            case "ranking_view":
+                this.ranking.handleMousePress();
+                break;
+
+            case "ranking_edit":
+                this.ranking.handleMousePress();
+                break;
         }
 
 	}
@@ -88,6 +111,9 @@ public class Main extends PApplet {
         switch (SCREEN) {
             case "game":
                 this.game.handleKeyPress(this.keyCode);
+                break;
+            case "ranking_edit":
+                this.ranking.handleKeyPress();
                 break;
         }
     }
@@ -105,6 +131,10 @@ public class Main extends PApplet {
         
             case "game_over":
                 this.gameOver.handleMouseHover();
+                break;
+
+            case "ranking_view":
+                this.ranking.handleMouseHover();
                 break;
         }
     }
